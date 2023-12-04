@@ -6,8 +6,7 @@ fun main() {
     val input = getResourceAsText("/day2/input.txt")
 
     val result = input.lines()
-        .map { processLine(it) }
-        .sum()
+        .sumOf { processLine(it) }
 
     println(result)
 }
