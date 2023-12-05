@@ -3,7 +3,7 @@ package day5
 import java.util.NavigableMap
 import java.util.TreeMap
 
-fun solve(maps: List<String>, seeds: Iterable<Long>): Long {
+fun solve(maps: List<String>, seeds: Sequence<Long>): Long {
     val (seedToSoil, soilToFertilizer, fertilizerToWater, waterToLight, lightToTemperature, temperatureToHumidity, humidityToLocation) = maps
         .map { parseRelationMap(it) }
         .map { it.associateByTo(TreeMap()) { relation -> relation.source } }
