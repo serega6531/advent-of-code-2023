@@ -8,16 +8,16 @@ fun main() {
     val result = input.lines()
         .map { it.split(' ') }
         .map { (hand, bid) -> HandAndBid(hand, bid.toInt()) }
-        .sortedWith(SimpleHandComparator)
+        .sortedWith(JokerHandComparator)
         .mapIndexed { index, (_, bid) -> (index + 1) * bid }
         .sum()
 
     println(result)
 }
 
-private object SimpleHandComparator : Comparator<HandAndBid> {
+private object JokerHandComparator : Comparator<HandAndBid> {
 
-    private val labels = listOf('A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2')
+    private val labels = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J')
 
     override fun compare(o1: HandAndBid, o2: HandAndBid): Int {
         val hand1 = o1.hand
@@ -41,9 +41,28 @@ private object SimpleHandComparator : Comparator<HandAndBid> {
     }
 
     private fun getType(hand: String): HandType {
-        val freq = hand.groupingBy { it }.eachCount().values.sortedDescending()
+        val frequencies = hand.groupingBy { it }.eachCount()
+        val jokers = frequencies['J'] ?: 0
 
-        return when (freq) {
+        if (jokers == 0) {
+            return getTypeSimple(frequencies)
+        }
+
+        val withoutJokers = frequencies.minus('J')
+        val maxLabel = withoutJokers.maxByOrNull { it.value }
+
+        if (maxLabel == null) { // only jokers
+            return HandType.FIVE_OF_A_KIND
+        }
+
+        val updated = maxLabel.key to (maxLabel.value + jokers)
+        return getTypeSimple(withoutJokers.plus(updated))
+    }
+
+    private fun getTypeSimple(frequencies: Map<Char, Int>): HandType {
+        val counts = frequencies.values.sortedDescending()
+
+        return when (counts) {
             listOf(5) -> HandType.FIVE_OF_A_KIND
             listOf(4, 1) -> HandType.FOUR_OF_A_KIND
             listOf(3, 2) -> HandType.FULL_HOUSE
