@@ -18,7 +18,7 @@ fun main() {
         .map { seq -> seq.first { it.first.endsWith('Z') } }
         .map { it.second }
 
-    val result = periods.lcm()
+    val result = periods.lcm() // didn't come up with the solution myself :(
 
     println(result)
 }
