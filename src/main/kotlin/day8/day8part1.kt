@@ -14,17 +14,7 @@ fun main() {
         .map { it.destructured }
         .associate { (source, left, right) -> source to (left to right) }
 
-    val result = generateSequence(start to 0) { (current, index) ->
-        val leftChoice = instructions[index % instructions.length] == 'L'
-        val choices = checkNotNull(nodes[current])
-        val next = if (leftChoice) {
-            choices.first
-        } else {
-            choices.second
-        }
-
-        next to (index + 1)
-    }
+    val result = getNodeSequence(start, instructions, nodes)
         .first { it.first == finish }
         .second
 
