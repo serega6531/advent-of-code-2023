@@ -1,6 +1,7 @@
 package day8
 
 import getResourceAsText
+import java.math.BigInteger
 
 fun main() {
     val (instructions, nodesString) = getResourceAsText("/day8/input.txt").split("\n\n")
@@ -12,20 +13,30 @@ fun main() {
         .map { it.destructured }
         .associate { (source, left, right) -> source to (left to right) }
 
-    val starts = nodes.keys.filter { it.endsWith('A') }
-
-    val sequences = starts
+    val periods = nodes.keys.filter { it.endsWith('A') }
         .map { getNodeSequence(it, instructions, nodes) }
-        .map { it.iterator() }
+        .map { seq -> seq.first { it.first.endsWith('Z') } }
+        .map { it.second }
 
-    val result = generateSequence({ starts.map { it to 0L } }, { sequences.advanceAll() })
-        .first { it.all { node -> node.first.endsWith('Z') } }
-        .first()
-        .second
+    val result = periods.lcm()
 
     println(result)
 }
 
-private fun <T> List<Iterator<T>>.advanceAll(): List<T> {
-    return this.map { it.next() }
+private fun List<Long>.lcm(): BigInteger {
+    return this.map { it.toBigInteger() }
+        .reduce { acc, num -> findLCM(acc, num) }
+}
+
+private fun findLCM(a: BigInteger, b: BigInteger): BigInteger {
+    val larger = if (a > b) a else b
+    val maxLcm = a * b
+    var lcm = larger
+    while (lcm <= maxLcm) {
+        if (lcm % a == BigInteger.ZERO && lcm % b == BigInteger.ZERO) {
+            return lcm
+        }
+        lcm += larger
+    }
+    return maxLcm
 }
