@@ -12,6 +12,7 @@ fun main() {
 }
 
 private fun processLine(line: String): Int {
-    val history = line.split(' ').map { it.toInt() }
-    return getNext(history)
+    val history = line.split(' ').map { it.toInt() }.asReversed()
+    val next = getNext(history)
+    return next
 }
