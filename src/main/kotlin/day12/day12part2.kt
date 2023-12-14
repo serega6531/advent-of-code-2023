@@ -19,5 +19,6 @@ private fun possiblePermutations(line: String): Int {
     val updatedGroups = List(5) { parsedGroups }.flatten()
 
     val permutations = calculatePermutations(updatedConditions, updatedGroups)
+    println("$line: $permutations")
     return permutations
 }

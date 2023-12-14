@@ -1,5 +1,7 @@
 package day12
 
+private val functionalSpringsRegex = Regex("\\.+")
+
 fun calculatePermutations(conditions: String, groups: List<Int>): Int {
     if (conditions.none { it == '?' }) {
         return if (isCorrectPermutation(conditions, groups)) {
@@ -15,8 +17,8 @@ fun calculatePermutations(conditions: String, groups: List<Int>): Int {
     }
 
     val firstUnknown = conditions.indexOfFirst { it == '?' }
-    val withOperational = calculatePermutations(conditions.with(firstUnknown, '.'), groups)
     val withDamaged = calculatePermutations(conditions.with(firstUnknown, '#'), groups)
+    val withOperational = calculatePermutations(conditions.with(firstUnknown, '.'), groups)
 
     return withOperational + withDamaged
 }
@@ -25,23 +27,40 @@ private fun isCorrectPrefix(conditions: String, groups: List<Int>): Boolean {
     val firstUnknown = conditions.indexOf('?')
     val beforeUnknown = conditions.substring(0, firstUnknown)
 
-    val prefixGroups = beforeUnknown.split(Regex("\\.+"))
+    val prefixGroups = beforeUnknown.split(functionalSpringsRegex)
         .map { it.count() }
         .filter { it != 0 }
 
-    val margin = if (firstUnknown > 0 && conditions[firstUnknown - 1] == '#') {
-        1
-    } else {
-        0
+    if (prefixGroups.isEmpty()) {
+        return true
     }
 
-    val truncated = prefixGroups.subList(0, (prefixGroups.size - margin).coerceAtLeast(0))
+    if (prefixGroups.size >= groups.size) { // assuming there are no question marks left
+        return false
+    }
 
-    return groups.startsWith(truncated)
+    val groupsLeft = if (firstUnknown > 0 && conditions[firstUnknown - 1] == '#') {
+        groups.takeLast(groups.size - prefixGroups.size - 1)
+    } else {
+        groups.takeLast(groups.size - prefixGroups.size)
+    }
+
+    val minCharsRequired = groupsLeft.sum() + (groupsLeft.size - 1)
+
+    if (conditions.length - firstUnknown < minCharsRequired) {
+        return false
+    }
+
+    return if (firstUnknown > 0 && conditions[firstUnknown - 1] == '#') {
+        val truncated = prefixGroups.subList(0, prefixGroups.size - 1)
+        groups.startsWith(truncated) && prefixGroups.last() <= groups[prefixGroups.size - 1]
+    } else {
+        groups.startsWith(prefixGroups.subList(0, prefixGroups.size))
+    }
 }
 
 private fun isCorrectPermutation(conditions: String, groups: List<Int>): Boolean {
-    val actualGroups = conditions.split(Regex("\\.+")).map { it.count() }.filter { it != 0 }
+    val actualGroups = conditions.split(functionalSpringsRegex).map { it.count() }.filter { it != 0 }
     return groups == actualGroups
 }
 
