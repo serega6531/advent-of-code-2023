@@ -1,6 +1,7 @@
 package day13
 
 import getResourceAsText
+import transpose
 import java.util.ArrayDeque
 import java.util.Deque
 
@@ -63,16 +64,3 @@ private fun getMirror(lines: List<String>): Int? {
     check(possibleMirrors.size <= 1)
     return possibleMirrors.keys.firstOrNull()?.plus(1)
 }
-
-private fun List<String>.transpose(): List<String> =
-    buildList {
-        this@transpose.first().indices.forEach { index ->
-            val sb = StringBuilder()
-
-            this@transpose.forEach { line ->
-                sb.append(line[index])
-            }
-
-            add(sb.toString())
-        }
-    }
