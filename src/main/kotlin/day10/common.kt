@@ -19,7 +19,7 @@ fun getStartingDirection(startY: Int, startX: Int, yx: List<List<Tile>>): Direct
     }!!
 }
 
-fun getLoopSequence(startY: Int, startX: Int, yx: List<List<Tile>>): Sequence<Pair<Int, Int>> {
+fun getLoopSequence(startY: Int, startX: Int, yx: List<List<Tile>>): Sequence<YX> {
     return sequence {
         var lastDirection: Direction = getStartingDirection(startY, startX, yx)
         var currentY = startY + lastDirection.dy
@@ -42,7 +42,7 @@ fun getLoopSequence(startY: Int, startX: Int, yx: List<List<Tile>>): Sequence<Pa
     }
 }
 
-fun List<List<Tile>>.indexesOf(predicate: (Tile) -> Boolean): Pair<Int, Int> {
+fun List<List<Tile>>.indexesOf(predicate: (Tile) -> Boolean): YX {
     this.forEachIndexed { y, line ->
         line.forEachIndexed { x, c ->
             if (predicate(c)) {
@@ -100,3 +100,5 @@ enum class Direction(
     }
 
 }
+
+typealias YX = Pair<Int, Int>
