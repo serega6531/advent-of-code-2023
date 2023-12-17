@@ -7,7 +7,7 @@ fun main() {
         .lines()
         .map { line -> line.map { Tile.parse(it) } }
 
-    val result = getEnergizedNumber(field)
+    val result = getEnergizedNumber(field, Triple(0, 0, Direction.RIGHT))
     println(result)
 }
 

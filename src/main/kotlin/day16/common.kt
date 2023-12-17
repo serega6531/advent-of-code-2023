@@ -2,7 +2,7 @@ package day16
 
 import YX
 
-fun getEnergizedNumber(field: List<List<Tile>>): Int {
+fun getEnergizedNumber(field: List<List<Tile>>, initialState: Triple<Int, Int, Direction>): Int {
     val maxY = field.lastIndex
     val maxX = field.first().lastIndex
 
@@ -75,7 +75,7 @@ fun getEnergizedNumber(field: List<List<Tile>>): Int {
         }
     }
 
-    simulateBeamRecursive(Triple(0, 0, Direction.RIGHT))
+    simulateBeamRecursive(initialState)
     return energized.size
 }
 
