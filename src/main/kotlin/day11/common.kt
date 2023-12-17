@@ -1,5 +1,6 @@
 package day11
 
+import YX
 import kotlin.math.abs
 
 fun solve(lines: List<String>, expanseSpeed: Int): Long {
@@ -50,5 +51,3 @@ private fun <T, R> List<T>.permutations(action: (T, T) -> R): List<R> {
         }
     }
 }
-
-private typealias YX = Pair<Int, Int>
