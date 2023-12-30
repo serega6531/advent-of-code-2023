@@ -5,7 +5,7 @@ import getResourceAsText
 
 fun main() {
     val field = getResourceAsText("/day21/input.txt").lines()
-    val steps = 64
+    val steps = 26501365
 
     val start = findStart(field)
 
@@ -22,7 +22,7 @@ private fun findPossibleSteps(field: List<String>, previous: Set<YX>): Set<YX> {
                 val potentialY = pos.first + direction.dy
                 val potentialX = pos.second + direction.dx
 
-                val tile = field.getOrNull(potentialY)?.getOrNull(potentialX)
+                val tile = field.getRepeated(potentialY).getRepeated(potentialX)
                 if (tile == 'S' || tile == '.') {
                     add(potentialY to potentialX)
                 }
@@ -30,3 +30,14 @@ private fun findPossibleSteps(field: List<String>, previous: Set<YX>): Set<YX> {
         }
     }
 }
+
+private fun <T> List<T>.getRepeated(index: Int): T {
+    val actual = index.mod(size)
+    return this[actual]
+}
+
+private fun String.getRepeated(index: Int): Char {
+    val actual = index.mod(length)
+    return this[actual]
+}
+
