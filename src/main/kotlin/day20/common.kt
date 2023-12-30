@@ -1,50 +1,6 @@
 package day20
 
-import getResourceAsText
-
-fun main() {
-    val descriptions = getResourceAsText("/day20/input.txt").lines()
-        .map { parseModuleDescription(it) }
-
-    val result = solve(descriptions)
-    println(result)
-}
-
-private fun solve(descriptions: List<ModuleDescription>): Int {
-    val modules = buildModules(descriptions).associateBy { it.name }
-
-    val queue = ArrayDeque<Pulse>()
-    var lowPulses = 0
-    var highPulses = 0
-
-    repeat(1000) {
-        queue.addLast(Pulse("button", "broadcaster", false)) // button press
-
-        while (queue.isNotEmpty()) {
-            val (from, to, high) = queue.removeFirst()
-
-            if (high) {
-                highPulses++
-            } else {
-                lowPulses++
-            }
-
-            val toModule = modules[to]
-
-            if (toModule == null) {
-                println("Unknown target module $to")
-                continue
-            }
-
-            toModule.trigger(from, high) { newTo, newHigh -> queue.addLast(Pulse(to, newTo, newHigh)) }
-        }
-    }
-
-    val result = lowPulses * highPulses
-    return result
-}
-
-private fun buildModules(descriptions: List<ModuleDescription>): List<Module> {
+fun buildModules(descriptions: List<ModuleDescription>): List<Module> {
     val sources = getSources(descriptions)
 
     return descriptions.map { buildModule(it, sources.getValue(it.name)) }
@@ -58,7 +14,7 @@ private fun buildModule(description: ModuleDescription, sources: List<String>): 
     }
 }
 
-private fun parseModuleDescription(s: String): ModuleDescription {
+fun parseModuleDescription(s: String): ModuleDescription {
     val (name, destinationsString) = s.split(" -> ")
     val destinations = destinationsString.split(", ")
 
@@ -80,19 +36,20 @@ private fun getSources(descriptions: List<ModuleDescription>): Map<String, List<
         }
 }
 
-private data class Pulse(val from: String, val to: String, val high: Boolean)
+data class Pulse(val from: String, val to: String, val high: Boolean)
 
-private data class ModuleDescription(val name: String, val type: ModuleType, val destinations: List<String>)
+data class ModuleDescription(val name: String, val type: ModuleType, val destinations: List<String>)
 
-private enum class ModuleType {
+enum class ModuleType {
     FLIP_FLOP, CONJUNCTION, BROADCAST
 }
 
-private sealed interface Module {
+sealed interface Module {
     val name: String
     val destinations: List<String>
 
     fun trigger(from: String, high: Boolean, send: (to: String, high: Boolean) -> Unit)
+    fun dumpState(): String
 }
 
 private class FlipFlopModule(
@@ -106,6 +63,10 @@ private class FlipFlopModule(
             state = !state
             destinations.forEach { send(it, state) }
         }
+    }
+
+    override fun dumpState(): String {
+        return state.toString()
     }
 }
 
@@ -127,6 +88,10 @@ private class ConjunctionModule(
         }
     }
 
+    override fun dumpState(): String {
+        return states.toString()
+    }
+
 }
 
 private class BroadcasterModule(
@@ -135,6 +100,10 @@ private class BroadcasterModule(
 ) : Module {
     override fun trigger(from: String, high: Boolean, send: (to: String, high: Boolean) -> Unit) {
         destinations.forEach { send(it, high) }
+    }
+
+    override fun dumpState(): String {
+        return "-"
     }
 
 }
