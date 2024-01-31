@@ -4,7 +4,7 @@ import getResourceAsText
 
 fun main() {
     val field = getResourceAsText("/day23/input.txt").lines()
-    val result = solve(field, false)
+    val result = solve(field, true)
 
     println(result)
 }
