@@ -15,7 +15,7 @@ fun main() {
     val testAreaStart = 200000000000000.0
     val testAreaEnd = 400000000000000.0
 
-    val result = stones.combinations()
+    val result = stones.combinationsWithoutRepeats()
         .count { (stone1, stone2) ->
             solve(stone1, stone2, testAreaStart, testAreaEnd)
         }
@@ -23,7 +23,7 @@ fun main() {
     println(result)
 }
 
-private fun <T> List<T>.combinations(): List<Pair<T, T>> {
+private fun <T> List<T>.combinationsWithoutRepeats(): List<Pair<T, T>> {
     return this.flatMapIndexed { index, item1 ->
         this.subList(index + 1, this.size).map { item2 ->
             Pair(item1, item2)
@@ -65,15 +65,6 @@ private fun solve(s1: PositionAndVelocity, s2: PositionAndVelocity, rangeStart: 
 
     return true
 }
-
-private data class PositionAndVelocity(
-    val px: Long,
-    val py: Long,
-    val pz: Long,
-    val vx: Long,
-    val vy: Long,
-    val vz: Long
-)
 
 private data class Vector2(
     val x: Double,
