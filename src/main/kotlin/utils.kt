@@ -17,3 +17,5 @@ fun List<String>.transpose(): List<String> =
             add(sb.toString())
         }
     }
+
+typealias YX = Pair<Int, Int>
