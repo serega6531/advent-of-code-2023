@@ -1,127 +1,53 @@
 package day10
 
+import YX
 import getResourceAsText
 
 fun main() {
-    val input = getResourceAsText("/day10/example2.txt")
+    val input = getResourceAsText("/day10/input.txt")
 
     val yx = input.lines()
         .map { it.toCharArray() }
         .map { line -> line.map { Tile.parseTile(it) } }
 
-    val (startY, startX) = yx.indexesOf { it == Tile.START }
+    val completeYX = cleanupTiles(yx)
+    printGrid(completeYX)
 
-    val loopTiles = getLoopSequence(startY, startX, yx).toList()
-    val polygons = getPolygons(loopTiles)
-
-    val result = countPolygonIntersections(loopTiles.toSet(), polygons)
-
-    println(result)
-}
-
-private fun countPolygonIntersections(
-    loopTiles: Set<YX>,
-    polygons: List<Polygon>
-): Int {
-    val minY = loopTiles.minOf { it.first }
-    val maxY = loopTiles.maxOf { it.first }
-    val minX = loopTiles.minOf { it.second }
-    val maxX = loopTiles.maxOf { it.second }
-
-    val segmentsByNode = createMapOfSegments(polygons)
-
-    val result = (minY..maxY).sumOf { y ->
-        (minX..maxX).count { x ->
-            val yx = y to x
-
-            if (!loopTiles.contains(yx)) {
-                val intersections = countIntersections(y, x, segmentsByNode)
-                intersections % 2 == 1
+    val result = completeYX.withIndex().sumOf { (y, row) ->
+        row.withIndex().count { (x, tile) ->
+            if (tile == Tile.GROUND) {
+                isEnclosedByLoop(y, x, completeYX)
             } else {
                 false
             }
         }
     }
-    return result
+
+    println(result)
 }
 
-private fun getPolygons(loopTiles: List<YX>): List<Polygon> {
-    val segments = getPolygonSegments(loopTiles).toMutableList()
+private fun cleanupTiles(yx: List<List<Tile>>): List<List<Tile>> {
+    val (startY, startX) = yx.indexesOf { it == Tile.START }
 
-    val first = segments.first()
-    val last = segments.last()
-    val startPoint = last.last()
+    val startingDirections = getStartingDirections(startY, startX, yx)
+    val newStartingTile = Tile.entries.find { it.directions == startingDirections.toSet() }!!
+    val loop = getLoopSequence(startY, startX, startingDirections.first(), yx).toList()
 
-    if (first[0].first - startPoint.first == first[1].first - first[0].first) {
-        val updatedFirst = listOf(startPoint, *first.toTypedArray())
-        segments[0] = updatedFirst
-    } else {
-        val updatedFirst = listOf(startPoint, first.first())
-        segments.add(0, updatedFirst)
-    }
-
-    if (segments.first()[1].first - segments.first()[0].first == last[1].first - last[0].first) {
-        val merged = last + segments.first().drop(1)
-        segments[0] = merged
-        segments.removeAt(segments.lastIndex)
-    }
-
-    return segments
-}
-
-private fun getPolygonSegments(loopTiles: List<YX>): Sequence<Polygon> {
-    return sequence {
-        var polygon = mutableListOf(loopTiles[0], loopTiles[1])
-        var dy = loopTiles[1].first - loopTiles[0].first
-
-        loopTiles.drop(2)
-            .forEach { tile ->
-                val prev = polygon.last()
-                val newDy = tile.first - prev.first
-
-                if (newDy != dy) {
-                    yield(polygon)
-                    polygon = mutableListOf(prev, tile)
-                    dy = newDy
-                } else {
-                    polygon.add(tile)
-                }
+    return yx.mapIndexed { y, row ->
+        row.mapIndexed { x, tile ->
+            when {
+                tile == Tile.START -> newStartingTile
+                YX(y, x) !in loop -> Tile.GROUND
+                else -> tile
             }
-
-        yield(polygon)
-    }
-}
-
-private fun createMapOfSegments(polygons: List<Polygon>): Map<YX, List<Polygon>> {
-    val result = mutableMapOf<YX, MutableList<Polygon>>()
-
-    polygons.forEach { polygon ->
-        polygon.forEach { yx ->
-            result.computeIfAbsent(yx) { mutableListOf() }.add(polygon)
-        }
-    }
-
-    return result
-}
-
-private fun countIntersections(y: Int, x: Int, segmentsByNode: Map<YX, List<Polygon>>): Int {
-    val seenTiles = mutableSetOf<YX>()
-
-    return (0..<y).count { intersectionY ->
-        val intersectionPoint = intersectionY to x
-
-        val segments = segmentsByNode[intersectionPoint]?.filter { it.isHorizontal() } ?: emptyList()
-
-        if (segments.isNotEmpty()) {
-            val seen = seenTiles.contains(intersectionPoint)
-            seenTiles.addAll(segments.flatten())
-            !seen
-        } else {
-            false
         }
     }
 }
 
-typealias Polygon = List<YX>
+private fun isEnclosedByLoop(y: Int, x: Int, yx: List<List<Tile>>): Boolean {
+    val intersections = (0..<x).count { lineX ->
+        yx[y][lineX] in setOf(Tile.VERTICAL, Tile.LEFT_DOWN, Tile.RIGHT_DOWN)
+    }
 
-private fun Polygon.isHorizontal() = this[0].first == this[1].first
+    return intersections % 2 == 1
+}

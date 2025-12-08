@@ -1,10 +1,12 @@
 package day10
 
-fun getStartingDirection(startY: Int, startX: Int, yx: List<List<Tile>>): Direction {
+import YX
+
+fun getStartingDirections(startY: Int, startX: Int, yx: List<List<Tile>>): List<Direction> {
     val maxY = yx.lastIndex
     val maxX = yx.first().lastIndex
 
-    return Direction.entries.find { direction ->
+    return Direction.entries.filter { direction ->
         val nextY = startY + direction.dy
         val nextX = startX + direction.dx
 
@@ -16,12 +18,12 @@ fun getStartingDirection(startY: Int, startX: Int, yx: List<List<Tile>>): Direct
         } else {
             false
         }
-    }!!
+    }
 }
 
-fun getLoopSequence(startY: Int, startX: Int, yx: List<List<Tile>>): Sequence<YX> {
+fun getLoopSequence(startY: Int, startX: Int, startingDirection: Direction, yx: List<List<Tile>>): Sequence<YX> {
     return sequence {
-        var lastDirection: Direction = getStartingDirection(startY, startX, yx)
+        var lastDirection: Direction = startingDirection
         var currentY = startY + lastDirection.dy
         var currentX = startX + lastDirection.dx
 
@@ -52,6 +54,25 @@ fun List<List<Tile>>.indexesOf(predicate: (Tile) -> Boolean): YX {
     }
 
     throw IllegalArgumentException()
+}
+
+fun printGrid(yx: List<List<Tile>>) {
+    yx.forEach { line ->
+        line.forEach { tile ->
+            val c = when (tile) {
+                Tile.START -> 'S'
+                Tile.GROUND -> '.'
+                Tile.VERTICAL -> '│'
+                Tile.LEFT_DOWN -> '┐'
+                Tile.RIGHT_DOWN -> '┌'
+                Tile.HORIZONTAL -> '─'
+                Tile.UP_RIGHT -> '└'
+                Tile.UP_LEFT -> '┘'
+            }
+            print(c)
+        }
+        println()
+    }
 }
 
 enum class Tile(
@@ -100,5 +121,3 @@ enum class Direction(
     }
 
 }
-
-typealias YX = Pair<Int, Int>

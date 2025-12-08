@@ -11,7 +11,8 @@ fun main() {
 
     val (startY, startX) = yx.indexesOf { it == Tile.START }
 
-    val seq = getLoopSequence(startY, startX, yx)
+    val startingDirection = getStartingDirections(startY, startX, yx).first()
+    val seq = getLoopSequence(startY, startX,  startingDirection, yx)
 
     val length = seq.count()
     val result = length / 2
